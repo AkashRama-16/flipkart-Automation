@@ -16,6 +16,7 @@ import com.aventstack.extentreports.ExtentTest;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import utils.LoggerHelper;
+import utils.GridUtil;
 
 public class Base {
 	// private static ThreadLocal<WebDriver> driver = new ThreadLocal<>();
@@ -46,15 +47,29 @@ public class Base {
 //			throw new Exception("Invalid browser name");
 //		}
 //	}
-	public void setUp(ITestContext context) {
-		WebDriverManager.chromedriver().setup();
+	public static void setUp(ITestContext context) {
+//		WebDriverManager.chromedriver().setup();
 //		WebDriver webDriver = new ChromeDriver();
 //		webDriver.manage().window().maximize();
 //		webDriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
 //		driver = new ChromeDriver();
+//		ChromeOptions options = new ChromeOptions();
+//
+//		driver = RemoteWebDriver.builder().address("http://localhost:4444").oneOf(options).build();
 		ChromeOptions options = new ChromeOptions();
+	    String gridUrl = "http://localhost:4444";
 
-		driver = RemoteWebDriver.builder().address("http://localhost:4444").oneOf(options).build();
+	    if (GridUtil.isGridRunning(gridUrl)) {
+	        logger.info("Selenium Grid is running. Launching RemoteWebDriver.");
+	        driver = RemoteWebDriver.builder()
+	                .address(gridUrl)
+	                .oneOf(options)
+	                .build();
+	    } else {
+	        logger.info("Selenium Grid is NOT running. Launching local ChromeDriver.");
+	        WebDriverManager.chromedriver().setup();
+	        driver = new org.openqa.selenium.chrome.ChromeDriver(options);
+	    }
 		logger.info("Browser initiated");
 		driver.manage().window().maximize();
 		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
